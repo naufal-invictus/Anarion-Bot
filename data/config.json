@@ -6,15 +6,15 @@
     "6282222222222@s.whatsapp.net"
   ],
   "groups": {
-    "120363420084777852@g.us": "general",
-    "120363043812345679@g.us": "game",
-    "120363043812345680@g.us": "language",
-    "120363043812345681@g.us": "blocked"
+    "123@g.us": "general",
+    "123@g.us": "game",
+    "123@g.us": "language",
+    "123@g.us": "blocked"
   },
    "broadcastGroups": [
-    "120363043812345678@g.us",
-    "120363043812345678@g.us"
+    "123@g.us",
+    "123@g.us"
   ],
-    "adminReportGroup": "120363420084777852@g.us"
+    "adminReportGroup": "123@g.us"
 
 }
