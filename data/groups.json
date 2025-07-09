@@ -1,0 +1,11 @@
+{
+  "120363043812345678@g.us": {
+    "welcomeMessage": "👋 Welcome @user to our community!",
+    "goodbyeMessage": "👋 Goodbye @user, see you later!",
+    "aiChatHistory": []
+  },
+  "120363043812345679@g.us": {
+    "welcomeMessage": "🎮 Welcome @user to the game zone!",
+    "goodbyeMessage": ""
+  }
+}   

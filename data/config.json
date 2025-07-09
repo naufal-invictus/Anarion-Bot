@@ -1,0 +1,20 @@
+{
+  "owner": ["6281234567890@s.whatsapp.net"],
+  "developers": ["6283150645824@s.whatsapp.net"],
+  "admins": [
+    "6281111111111@s.whatsapp.net",
+    "6282222222222@s.whatsapp.net"
+  ],
+  "groups": {
+    "120363420084777852@g.us": "general",
+    "120363043812345679@g.us": "game",
+    "120363043812345680@g.us": "language",
+    "120363043812345681@g.us": "blocked"
+  },
+   "broadcastGroups": [
+    "120363043812345678@g.us",
+    "120363043812345678@g.us"
+  ],
+    "adminReportGroup": "120363420084777852@g.us"
+
+}

@@ -1,0 +1,28 @@
+{
+  "6283150645824@s.whatsapp.net": {
+    "xp": 126,
+    "level": 1,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 26,
+      "weekly": 26,
+      "monthly": 26,
+      "total": 26
+    }
+  },
+  "6287737355609@s.whatsapp.net": {
+    "xp": 28,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 1,
+      "weekly": 1,
+      "monthly": 1,
+      "total": 1
+    }
+  }
+}
