@@ -6,18 +6,29 @@
     "6282222222222@s.whatsapp.net"
   ],
   "groups": {
+<<<<<<< HEAD
     "120363420084777852@g.us": "general",
     "1203630438123456792@g.us": "game",
     "1203630438123456280@g.us": "language",
     "1203630438123456821@g.us": "blocked"
+=======
+    "123@g.us": "general",
+    "123@g.us": "game",
+    "123@g.us": "language",
+    "123@g.us": "blocked"
+>>>>>>> 99e2dac77156db575f30ff84054d9af7f3e4296d
   },
    "broadcastGroups": [
-    "120363043812345678@g.us",
-    "120363043812345678@g.us"
+    "123@g.us",
+    "123@g.us"
   ],
+<<<<<<< HEAD
     "adminReportGroup": "120363420084777852@g.us",
     "toxicAdminJid": "62831506445822@s.whatsapp.net",  
  "toxicWordsFile": "toxic_words", 
 "scoldingMessagesFile": "scolding_messages"
+=======
+    "adminReportGroup": "123@g.us"
+>>>>>>> 99e2dac77156db575f30ff84054d9af7f3e4296d
 
 }
