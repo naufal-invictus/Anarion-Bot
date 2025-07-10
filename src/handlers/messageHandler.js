@@ -1,21 +1,21 @@
-// src/handlers/messageHandler.js
+// src/handlers/messageHandler.js (Diperbarui untuk logging pesan grup)
 const path = require('path');
 const fs = require('fs-extra');
 const db = require('../utils/db');
 const botState = require('../utils/botState');
 const { incrementActivity } = require('../utils/leveling.js');
-const antiToxic = require('../utils/antiToxic'); // Import modul antiToxic
-const { sendBotMessage, getLoggerInstance } = require('../utils/botMessenger'); // Import sendBotMessage dan logger getter
+const { askSmartAI } = require('../utils/ai.js');
+const botMessenger = require('../utils/botMessenger');
 
 // --- Konfigurasi Anti-Spam ---
-// Map untuk menyimpan timestamp perintah terakhir dari setiap pengguna
 const antiSpam = new Map();
-// Waktu cooldown dalam milidetik (contoh: 5 detik)
-const SPAM_COOLDOWN = 5000;
+const SPAM_COOLDOWN = 5000; 
+
+// --- Konfigurasi Filter Pesan Lama ---
+const MESSAGE_AGE_THRESHOLD = 60 * 1000; 
 
 const commands = new Map();
 
-// Fungsi loadCommands tetap sama...
 async function loadCommands() {
     const commandDir = path.join(__dirname, '..', 'commands');
     const categories = await fs.readdir(commandDir);
@@ -39,91 +39,148 @@ async function loadCommands() {
 loadCommands();
 
 
-module.exports = async (sock, msg, logger) => { // 'sock' dan 'logger' masih diterima di sini dari index.js
+module.exports = async (sock, msg, logger) => {
+    // Abaikan pesan yang dikirim oleh bot itu sendiri
+    if (msg.key.fromMe) return; 
+
+    // Abaikan pesan yang terlalu tua
+    const messageTimestampMs = parseInt(msg.messageTimestamp) * 1000;
+    if (Date.now() - messageTimestampMs > MESSAGE_AGE_THRESHOLD) {
+        logger.info(`[FILTER] Mengabaikan pesan lama dari ${msg.key.remoteJid} (timestamp: ${msg.messageTimestamp})`);
+        return;
+    }
+
     const { message, key } = msg;
     const text = message?.conversation || message?.extendedTextMessage?.text || '';
     const senderJid = key.participant || key.remoteJid;
     const groupJid = key.remoteJid;
-    const config = await db.readData('config');
-    const pinoLogger = getLoggerInstance(); // Dapatkan instance logger dari botMessenger
+    const config = await db.readData('config'); // Pastikan config dibaca di sini
+    const groupsData = await db.readData('groups'); // Pastikan groupsData dibaca di sini
+    const senderName = msg.pushName || senderJid.split('@')[0]; 
 
-    // ======================== DEBUGGING ========================
+    // <<< TAMBAH LOG UNTUK SEMUA PESAN GRUP DI SINI >>>
     if (groupJid.endsWith('@g.us')) {
-        const groupCategory = config.groups[groupJid];
-        if (pinoLogger) {
-            pinoLogger.debug(`[DEBUG] Pesan dari Grup ID: ${groupJid}`);
-            pinoLogger.debug(`[DEBUG] Kategori Grup terdeteksi: ${groupCategory}`);
-        } else {
-            console.debug(`[DEBUG] Pesan dari Grup ID: ${groupJid}`); // Fallback jika logger belum terinisialisasi
-            console.debug(`[DEBUG] Kategori Grup terdeteksi: ${groupCategory}`);
-        }
+        const groupCategory = config.groups[groupJid] || 'undefined/not-listed'; // Mengambil kategori grup, fallback jika tidak ada
+        // Hapus console.log debug yang lama
+        // console.log(`[DEBUG] Pesan dari Grup ID: ${groupJid}`); 
+        // console.log(`[DEBUG] Kategori Grup terdeteksi: ${groupCategory}`);
+
+        // Log pesan grup dalam format yang diminta
+        logger.info(`[PESAN_GRUP] Pesan dari ${senderName} (${senderJid.split('@')[0]}): '${text}', dari grup ID: ${groupJid}, Kategori: ${groupCategory}`);
     }
-    // =========================================================
+    // <<< AKHIR TAMBAHAN >>>
 
-    // --- ANTI-TOXIC CHECK (SEBELUM PEMROSESAN PERINTAH) ---
-    const isToxic = await antiToxic.checkToxic(text, senderJid, groupJid, msg.key);
-    if (isToxic) {
-        if (pinoLogger) pinoLogger.info({ user: senderJid, group: groupJid, message: text }, 'Pesan toxic terdeteksi, menghentikan pemrosesan perintah.');
-        return; // Hentikan pemrosesan lebih lanjut jika pesan toxic
-    }
-
-    // --- Logika Pemberian XP ---
-    const groupCategory = config.groups[groupJid];
-    if (groupJid.endsWith('@g.us') && groupCategory && groupCategory !== 'blocked') {
-        incrementActivity(senderJid);
-    }
-
-    if (!text.startsWith('!')) return; // Hanya proses jika berupa perintah
-
-    // Cek status On/Off bot
+    // Cek status On/Off bot (global)
     if (!botState.isActive() && !text.startsWith('!on')) {
         return;
     }
 
+    // Filter Grup: Hanya merespons di grup yang tidak diblokir atau tidak ada di config.groups
+    const groupCategory = config.groups[groupJid]; // Mengambil ulang kategori grup (untuk logika filter ini)
+    if (groupJid.endsWith('@g.us') && (!groupCategory || groupCategory === 'blocked')) {
+        if (!text.startsWith('!on')) {
+            return;
+        }
+    }
+
+    // Logika Pemberian XP
+    if (groupJid.endsWith('@g.us') && groupCategory && groupCategory !== 'blocked') {
+        incrementActivity(senderJid);
+    }
+    
     const args = text.slice(1).trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
+    const commandName = args.shift()?.toLowerCase();
     const command = commands.get(commandName);
 
-    if (!command) return;
-
-    // --- Permission & Anti-Spam Logic ---
     const userRole = config.owner.includes(senderJid) ? 'owner' :
                      config.developers.includes(senderJid) ? 'developer' :
                      config.admins.includes(senderJid) ? 'admin' : 'user';
 
-    // 1. Cek Anti-Spam (tidak berlaku untuk Owner dan Developer)
-    if (userRole !== 'owner' && userRole !== 'developer') {
-        const now = Date.now();
-        const lastCommandTime = antiSpam.get(senderJid);
+    if (text.startsWith('!')) {
+        if (userRole !== 'owner' && userRole !== 'developer') {
+            const now = Date.now();
+            const lastCommandTime = antiSpam.get(senderJid);
 
-        if (lastCommandTime) {
-            const timeDiff = now - lastCommandTime;
-            if (timeDiff < SPAM_COOLDOWN) {
-                if (pinoLogger) pinoLogger.warn({ sender: senderJid, command: commandName }, 'Aksi spam terdeteksi.');
-                // Mengirim pesan peringatan kepada pengguna
-                await sendBotMessage(msg.key.remoteJid, { text: `⚠️ Anda terlalu cepat! Mohon tunggu beberapa detik sebelum menggunakan perintah lagi.` }, { quoted: msg });
-                return;
+            if (lastCommandTime) {
+                const timeDiff = now - lastCommandTime;
+                if (timeDiff < SPAM_COOLDOWN) {
+                    logger.warn({ sender: senderJid, command: commandName }, 'Aksi spam terdeteksi.');
+                    await botMessenger.sendBotMessage(msg.key.remoteJid, { text: `⚠️ Anda terlalu cepat! Mohon tunggu beberapa detik sebelum menggunakan perintah lagi.` }, { quoted: msg });
+                    return; 
+                }
+            }
+            antiSpam.set(senderJid, now);
+        }
+
+        if (!command) {
+            return;
+        }
+
+        if (command.category === 'admin' && !['owner', 'developer', 'admin'].includes(userRole)) {
+            await botMessenger.sendBotMessage(msg.key.remoteJid, { text: '⛔ Anda tidak memiliki izin untuk menggunakan perintah ini.' }, { quoted: msg });
+            return;
+        }
+
+        try {
+            const from = senderJid.split('@')[0];
+            const groupInfoLog = groupJid.endsWith('@g.us') ? `Grup (${groupJid.slice(0, 9)}...)` : 'DM';
+            logger.info({ from, in: groupInfoLog, command: text }, `Perintah diterima`);
+            
+            await command.execute(sock, msg, args, userRole); 
+        } catch (error) {
+            logger.error({ err: error, command: commandName }, `Error tidak tertangani pada handler utama`);
+            await botMessenger.sendBotMessage(msg.key.remoteJid, { text: `Maaf, terjadi kesalahan: ${error.message}` }, { quoted: msg });
+        }
+        return;
+    }
+
+    if (groupJid.endsWith('@g.us')) {
+        let groupConfig = groupsData[groupJid];
+        if (!groupConfig) {
+            groupConfig = { 
+                groupChatHistory: [], 
+                rpModeEnabled: false, 
+                welcomeMessage: "Selamat datang, @{tag} di grup kami! Senang Anda bergabung. ", 
+                goodbyeMessage: "Sampai jumpa, @{tag}! Kami akan merindukanmu.", 
+                goodbyePrivateMessage: "Halo @{tag}, Anda telah keluar dari grup. Semoga hari Anda menyenangkan!", 
+                groupInviteLink: "" 
+            }; 
+            groupsData[groupJid] = groupConfig;
+            await db.writeData('groups', groupsData);
+        }
+
+        if (!groupConfig.groupChatHistory) {
+            groupConfig.groupChatHistory = [];
+        }
+
+        let groupChatHistory = groupConfig.groupChatHistory;
+
+        if (groupConfig.rpModeEnabled && text.toLowerCase().includes('pelayan')) {
+            console.log(`[RP-BOT] Menerima pesan roleplay dari ${senderJid} di ${groupJid}`);
+
+            groupChatHistory.push({ role: 'user', senderName: senderName, content: text });
+
+            const MAX_HISTORY_LENGTH = 15;
+            if (groupChatHistory.length > MAX_HISTORY_LENGTH) {
+                groupChatHistory = groupChatHistory.slice(-MAX_HISTORY_LENGTH);
+            }
+
+            try {
+                const rpResponse = await askSmartAI(text, groupChatHistory, true);
+
+                if (rpResponse && typeof rpResponse.text === 'string' && rpResponse.text.length > 0) {
+                    await botMessenger.sendBotMessage(groupJid, { text: rpResponse.text }, { quoted: msg });
+                    groupChatHistory.push({ role: 'assistant', content: rpResponse.text });
+                    
+                    groupConfig.groupChatHistory = groupChatHistory;
+                    await db.writeData('groups', groupsData); 
+                } else {
+                    console.warn(`[RP-BOT] AI gagal memberikan respons atau respons kosong untuk query: "${text}"`);
+                }
+
+            } catch (error) {
+                console.error(`[RP-BOT] Error saat memanggil AI untuk roleplay:`, error);
             }
         }
-        antiSpam.set(senderJid, now);
-    }
-
-    // 2. Cek Permission Admin
-    if (command.category === 'admin' && !['owner', 'developer', 'admin'].includes(userRole)) {
-        return; // Abaikan jika bukan admin
-    }
-
-    // --- Eksekusi Perintah ---
-    try {
-        const from = senderJid.split('@')[0];
-        const groupInfo = groupJid.endsWith('@g.us') ? `Grup (${groupJid.slice(0, 9)}...)` : 'DM';
-        if (pinoLogger) pinoLogger.info({ from, in: groupInfo, command: text }, `Perintah diterima`);
-        
-        // Teruskan 'sock' ke perintah karena beberapa perintah mungkin masih membutuhkannya
-        // untuk fungsi Baileys spesifik yang belum dibungkus oleh botMessenger.
-        await command.execute(sock, msg, args, userRole);
-    } catch (error) {
-        if (pinoLogger) pinoLogger.error({ err: error, command: commandName }, `Error tidak tertangani pada handler utama`);
-        // JANGAN kirim error ke WA dari sini; perintah akan menangani pesan error yang menghadap pengguna mereka sendiri.
     }
 };

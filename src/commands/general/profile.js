@@ -1,10 +1,16 @@
+// src/commands/general/profile.js (Diperbarui)
 const { getUserData } = require('../../utils/leveling.js');
-const { sendBotMessage } = require('../../utils/botMessenger'); // Tambahkan ini
+const botMessenger = require('../../utils/botMessenger'); // Import botMessenger
 
 module.exports = {
     name: 'profile',
     category: 'general',
     description: 'Menampilkan profil Anda (Level, XP, Role, Typology).',
+    access: { // <<< Tambahkan ini
+        general: true,
+        game: true,
+        language: true
+    },
     execute: async (sock, msg) => {
         try {
             const senderJid = msg.key.participant || msg.key.remoteJid;
@@ -23,13 +29,13 @@ module.exports = {
 │
 *╰───────────···*
             `;
-            await sendBotMessage(msg.key.remoteJid, {
+            await botMessenger.sendBotMessage(msg.key.remoteJid, {
                 text: profileText,
                 mentions: [senderJid]
             }, { quoted: msg });
         } catch (error) {
             console.error("Error di perintah !profile:", error);
-            await sendBotMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !profile.` }, { quoted: msg });
+            await botMessenger.sendBotMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !profile.` }, { quoted: msg });
         }
     },
 };

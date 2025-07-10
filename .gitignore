@@ -5,9 +5,11 @@ yarn-error.log
 
 # Baileys Auth
 auth_info_baileys/
+baileys_auth_info
 
 # Environment
 .env
 
 # IDE
 .vscode/
+.baileys_auth_info

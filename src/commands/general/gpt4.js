@@ -6,6 +6,11 @@ module.exports = {
     name: 'gpt4',
     category: 'general',
     description: 'Bertanya kepada GPT-4 AI melalui Maelyn API.',
+        access: { // <<< Tambahkan ini
+        general: true,
+        game: true,
+        language: true
+    },
     execute: async (sock, msg, args) => {
         const query = args.join(' ');
         if (!query) {

@@ -6,6 +6,11 @@ module.exports = {
     name: 'qwenturbo',
     category: 'general',
     description: 'Bertanya kepada Alibaba Qwen Turbo AI.',
+        access: { // <<< Tambahkan ini
+        general: true,
+        game: true,
+        language: true
+    },
     execute: async (sock, msg, args) => {
         const query = args.join(' ');
         if (!query) {

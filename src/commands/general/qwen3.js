@@ -6,6 +6,11 @@ module.exports = {
     name: 'qwen3',
     category: 'general',
     description: 'Bertanya kepada Alibaba Qwen 3 AI.',
+        access: { // <<< Tambahkan ini
+        general: true,
+        game: true,
+        language: true
+    },
     execute: async (sock, msg, args) => {
         const query = args.join(' ');
         if (!query) {

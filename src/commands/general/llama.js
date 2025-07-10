@@ -6,6 +6,11 @@ module.exports = {
     name: 'llama',
     category: 'general',
     description: 'Bertanya kepada Groq LLAMA AI.',
+        access: { // <<< Tambahkan ini
+        general: true,
+        game: true,
+        language: true
+    },
     execute: async (sock, msg, args) => {
         const query = args.join(' ');
         if (!query) {

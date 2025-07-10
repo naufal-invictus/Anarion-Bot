@@ -1,0 +1,5 @@
+{
+  "defaultWelcomeMessage": "Selamat datang, @{tag} di grup kami! Senang Anda bergabung.",
+  "defaultGoodbyeMessage": "Sampai jumpa, @{tag}! Kami akan merindukanmu. Jika ingin bergabung kembali, silakan klik link grup ini: [LINK_GRUP_ANDA]",
+  "defaultGoodbyePrivateMessage": "Halo @{tag}, Anda telah keluar dari grup. Jika ingin bergabung kembali, silakan klik link grup ini: [LINK_GRUP_ANDA]."
+}

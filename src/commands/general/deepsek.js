@@ -6,6 +6,11 @@ module.exports = {
     name: 'deepseek',
     category: 'general',
     description: 'Bertanya kepada Groq Deepseek AI.',
+        access: { // <<< Tambahkan ini
+        general: true,
+        game: true,
+        language: true
+    },
     execute: async (sock, msg, args) => {
         const query = args.join(' ');
         if (!query) {

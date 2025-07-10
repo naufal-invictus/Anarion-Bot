@@ -1,16 +1,15 @@
-<<<<<<< HEAD
 {
   "6283150645824@s.whatsapp.net": {
-    "xp": 288,
-    "level": 1,
+    "xp": 495,
+    "level": 2,
     "roles": [],
     "personality": "Belum diatur",
     "nickname": "Pengguna Baru",
     "activity": {
-      "daily": 15,
-      "weekly": 83,
-      "monthly": 83,
-      "total": 83
+      "daily": 84,
+      "weekly": 152,
+      "monthly": 152,
+      "total": 152
     },
     "toxic_violations": 0
   },
@@ -26,8 +25,33 @@
       "monthly": 1,
       "total": 1
     }
+  },
+  "6285150595238@s.whatsapp.net": {
+    "xp": 67,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 22,
+      "weekly": 22,
+      "monthly": 22,
+      "total": 22
+    },
+    "toxic_violations": 0
+  },
+  "120363420084777852@g.us": {
+    "xp": 33,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 9,
+      "weekly": 9,
+      "monthly": 9,
+      "total": 9
+    },
+    "toxic_violations": 0
   }
 }
-=======
-{}
->>>>>>> 99e2dac77156db575f30ff84054d9af7f3e4296d

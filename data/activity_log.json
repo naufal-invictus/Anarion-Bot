@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "timestamp": "10 Jul 2025, 15.39",
+    "type": "leave",
+    "userJid": "6285150595238@s.whatsapp.net",
+    "groupName": "Wa"
+  },
+  {
+    "timestamp": "10 Jul 2025, 15.39",
+    "type": "join",
+    "userJid": "6285150595238@s.whatsapp.net",
+    "groupName": "Wa"
+  }
+]

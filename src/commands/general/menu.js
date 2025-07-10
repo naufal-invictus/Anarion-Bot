@@ -6,6 +6,11 @@ module.exports = {
     name: 'menu',
     category: 'general',
     description: 'Menampilkan menu perintah bot.',
+   access: { // <<< Tambahkan ini. Menu harus tersedia di semua kategori.
+        general: true,
+        game: true,
+        language: true
+    },
     execute: async (sock, msg) => { // 'sookck' tetap di sini untuk argumen lain
         try {
             const senderJid = msg.key.participant || msg.key.remoteJid;
@@ -33,6 +38,7 @@ module.exports = {
 │  • *!gpt4 <teks>* - Tanya AI GPT-4 
 │  • *!qwenturbo <teks>* - Tanya AI Qwen Turbo
 │  • *!qwen3 <teks>* - Tanya AI Qwen 3
+│  • *!scout <teks>* - Tanya AI Scout
 │  • *!qwen-max <teks>* - Tanya AI Qwen Max
 │  • *!llama <teks>* - Tanya AI Llama 
 │  • *!deepseek <teks>* - Tanya AI Deepseek 
@@ -55,7 +61,9 @@ module.exports = {
 │  • *!report <day|week|month|all>* - Laporan aktivitas
 │  • *!restart* - Restart bot
 │  • *!shutdown* - Matikan bot
-│
+│  • *!rpon* - Aktifkan mode roleplay (per grup)
+│  • *!rpoff* - Nonaktifkan mode roleplay (per grup)
+│  
 *├───「 📱 Ikuti Kami 」───*
 │
 │ • *Instagram:* @lamaisontypology
