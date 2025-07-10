@@ -1,15 +1,17 @@
+// src/handlers/messageHandler.js
 const path = require('path');
 const fs = require('fs-extra');
 const db = require('../utils/db');
 const botState = require('../utils/botState');
-const { incrementActivity } = require('../utils/leveling.js'); // Ganti impor
-const { addXP } = require('../utils/leveling.js');
+const { incrementActivity } = require('../utils/leveling.js');
+const antiToxic = require('../utils/antiToxic'); // Import modul antiToxic
+const { sendBotMessage, getLoggerInstance } = require('../utils/botMessenger'); // Import sendBotMessage dan logger getter
 
 // --- Konfigurasi Anti-Spam ---
 // Map untuk menyimpan timestamp perintah terakhir dari setiap pengguna
 const antiSpam = new Map();
 // Waktu cooldown dalam milidetik (contoh: 5 detik)
-const SPAM_COOLDOWN = 5000; 
+const SPAM_COOLDOWN = 5000;
 
 const commands = new Map();
 
@@ -37,27 +39,41 @@ async function loadCommands() {
 loadCommands();
 
 
-module.exports = async (sock, msg, logger) => {
+module.exports = async (sock, msg, logger) => { // 'sock' dan 'logger' masih diterima di sini dari index.js
     const { message, key } = msg;
     const text = message?.conversation || message?.extendedTextMessage?.text || '';
     const senderJid = key.participant || key.remoteJid;
     const groupJid = key.remoteJid;
     const config = await db.readData('config');
+    const pinoLogger = getLoggerInstance(); // Dapatkan instance logger dari botMessenger
+
     // ======================== DEBUGGING ========================
-    // Log ini akan muncul di terminal untuk SETIAP pesan yang masuk ke grup
     if (groupJid.endsWith('@g.us')) {
         const groupCategory = config.groups[groupJid];
-        console.log(`[DEBUG] Pesan dari Grup ID: ${groupJid}`);
-        console.log(`[DEBUG] Kategori Grup terdeteksi: ${groupCategory}`);
+        if (pinoLogger) {
+            pinoLogger.debug(`[DEBUG] Pesan dari Grup ID: ${groupJid}`);
+            pinoLogger.debug(`[DEBUG] Kategori Grup terdeteksi: ${groupCategory}`);
+        } else {
+            console.debug(`[DEBUG] Pesan dari Grup ID: ${groupJid}`); // Fallback jika logger belum terinisialisasi
+            console.debug(`[DEBUG] Kategori Grup terdeteksi: ${groupCategory}`);
+        }
     }
     // =========================================================
+
+    // --- ANTI-TOXIC CHECK (SEBELUM PEMROSESAN PERINTAH) ---
+    const isToxic = await antiToxic.checkToxic(text, senderJid, groupJid, msg.key);
+    if (isToxic) {
+        if (pinoLogger) pinoLogger.info({ user: senderJid, group: groupJid, message: text }, 'Pesan toxic terdeteksi, menghentikan pemrosesan perintah.');
+        return; // Hentikan pemrosesan lebih lanjut jika pesan toxic
+    }
+
     // --- Logika Pemberian XP ---
     const groupCategory = config.groups[groupJid];
     if (groupJid.endsWith('@g.us') && groupCategory && groupCategory !== 'blocked') {
-        incrementActivity(senderJid); // Panggil fungsi baru ini
+        incrementActivity(senderJid);
     }
-    
-    if (!text.startsWith('!')) return;
+
+    if (!text.startsWith('!')) return; // Hanya proses jika berupa perintah
 
     // Cek status On/Off bot
     if (!botState.isActive() && !text.startsWith('!on')) {
@@ -83,15 +99,12 @@ module.exports = async (sock, msg, logger) => {
         if (lastCommandTime) {
             const timeDiff = now - lastCommandTime;
             if (timeDiff < SPAM_COOLDOWN) {
-                // Jika terdeteksi spam, kirim peringatan dan hentikan eksekusi
-                logger.warn({ sender: senderJid, command: commandName }, 'Aksi spam terdeteksi.');
-                // Mengirim pesan peringatan hanya sekali saja agar tidak ikut jadi spam
-                // (Pesan ini bisa dihapus jika tidak diinginkan)
-                await sock.sendMessage(msg.key.remoteJid, { text: `⚠️ Anda terlalu cepat! Mohon tunggu beberapa detik sebelum menggunakan perintah lagi.` }, { quoted: msg });
-                return; 
+                if (pinoLogger) pinoLogger.warn({ sender: senderJid, command: commandName }, 'Aksi spam terdeteksi.');
+                // Mengirim pesan peringatan kepada pengguna
+                await sendBotMessage(msg.key.remoteJid, { text: `⚠️ Anda terlalu cepat! Mohon tunggu beberapa detik sebelum menggunakan perintah lagi.` }, { quoted: msg });
+                return;
             }
         }
-        // Update timestamp perintah terakhir pengguna
         antiSpam.set(senderJid, now);
     }
 
@@ -104,10 +117,13 @@ module.exports = async (sock, msg, logger) => {
     try {
         const from = senderJid.split('@')[0];
         const groupInfo = groupJid.endsWith('@g.us') ? `Grup (${groupJid.slice(0, 9)}...)` : 'DM';
-        logger.info({ from, in: groupInfo, command: text }, `Perintah diterima`);
+        if (pinoLogger) pinoLogger.info({ from, in: groupInfo, command: text }, `Perintah diterima`);
         
+        // Teruskan 'sock' ke perintah karena beberapa perintah mungkin masih membutuhkannya
+        // untuk fungsi Baileys spesifik yang belum dibungkus oleh botMessenger.
         await command.execute(sock, msg, args, userRole);
     } catch (error) {
-        logger.error({ err: error, command: commandName }, `Error tidak tertangani pada handler utama`);
+        if (pinoLogger) pinoLogger.error({ err: error, command: commandName }, `Error tidak tertangani pada handler utama`);
+        // JANGAN kirim error ke WA dari sini; perintah akan menangani pesan error yang menghadap pengguna mereka sendiri.
     }
 };

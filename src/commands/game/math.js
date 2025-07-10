@@ -1,3 +1,5 @@
+const { sendBotMessage } = require('../../utils/botMessenger'); // Tambahkan ini
+
 module.exports = {
     name: 'math',
     category: 'game',
@@ -9,7 +11,7 @@ module.exports = {
     description: 'A simple math game (placeholder).',
     execute: async (sock, msg, args) => {
         // Placeholder for math game logic
-        await sock.sendMessage(msg.key.remoteJid, { text: '🚧 The !saymath command is currently under construction.' }, { quoted: msg });
+        await sendBotMessage(msg.key.remoteJid, { text: '🚧 The !saymath command is currently under construction.' }, { quoted: msg });
     },
     
 };

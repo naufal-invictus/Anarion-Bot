@@ -1,4 +1,5 @@
 import db from '../../utils/db.js';
+import { sendBotMessage } from '../../utils/botMessenger.js'; // Tambahkan ini
 
 export default {
     name: 'broadcast',
@@ -8,14 +9,14 @@ export default {
         try {
             const message = args.join(' ');
             if (!message) {
-                return sock.sendMessage(msg.key.remoteJid, { text: 'Mohon sertakan pesan untuk broadcast.' }, { quoted: msg });
+                return sendBotMessage(msg.key.remoteJid, { text: 'Mohon sertakan pesan untuk broadcast.' }, { quoted: msg });
             }
 
             const config = await db.readData('config');
             const broadcastGroups = config.broadcastGroups || [];
 
             if (broadcastGroups.length === 0) {
-                return sock.sendMessage(msg.key.remoteJid, { text: 'Tidak ada grup yang terdaftar untuk broadcast.' }, { quoted: msg });
+                return sendBotMessage(msg.key.remoteJid, { text: 'Tidak ada grup yang terdaftar untuk broadcast.' }, { quoted: msg });
             }
 
             let successCount = 0;
@@ -25,7 +26,7 @@ export default {
 
             for (const groupId of broadcastGroups) {
                 try {
-                    await sock.sendMessage(groupId, { text: broadcastMessage });
+                    await sendBotMessage(groupId, { text: broadcastMessage });
                     successCount++;
                 } catch (e) {
                     failCount++;
@@ -33,13 +34,13 @@ export default {
                 }
             }
 
-            await sock.sendMessage(msg.key.remoteJid, {
+            await sendBotMessage(msg.key.remoteJid, {
                 text: `Pesan broadcast selesai.\nBerhasil: ${successCount} grup.\nGagal: ${failCount} grup.`
             }, { quoted: msg });
 
         } catch (error) {
             console.error("Error di perintah !broadcast:", error);
-            await sock.sendMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !broadcast.` }, { quoted: msg });
+            await sendBotMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !broadcast.` }, { quoted: msg });
         }
     },
 };

@@ -1,3 +1,4 @@
+// src/utils/leveling.js
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -28,7 +29,7 @@ const saveUsers = () => {
     }
 };
 
-// Memastikan struktur data pengguna lengkap dengan data aktivitas
+// Memastikan struktur data pengguna lengkap dengan data aktivitas dan pelanggaran toxic
 const ensureUserData = (jid) => {
     if (!users[jid]) {
         users[jid] = {
@@ -42,10 +43,17 @@ const ensureUserData = (jid) => {
                 weekly: 0,
                 monthly: 0,
                 total: 0
-            }
+            },
+            toxic_violations: 0 // <-- TAMBAH INI: Inisialisasi penghitung pelanggaran
         };
-    } else if (!users[jid].activity) { // Kompatibilitas untuk data lama
-        users[jid].activity = { daily: 0, weekly: 0, monthly: 0, total: 0 };
+    } else {
+        // Kompatibilitas untuk data lama: Pastikan field baru ada
+        if (users[jid].activity === undefined) {
+            users[jid].activity = { daily: 0, weekly: 0, monthly: 0, total: 0 };
+        }
+        if (users[jid].toxic_violations === undefined) {
+            users[jid].toxic_violations = 0; // <-- TAMBAH INI: Pastikan ada untuk pengguna lama
+        }
     }
 };
 
@@ -53,7 +61,7 @@ module.exports = {
     // Fungsi untuk menambah aktivitas dan XP setiap kali ada pesan
     incrementActivity: (jid) => {
         ensureUserData(jid);
-        
+
         // Tambah hitungan aktivitas
         users[jid].activity.daily += 1;
         users[jid].activity.weekly += 1;
@@ -82,7 +90,7 @@ module.exports = {
         saveUsers();
         console.log(`Reset data ${period} selesai.`);
     },
-    
+
     // Fungsi untuk mendapatkan semua data pengguna
     getAllUsers: () => {
         try {
@@ -95,5 +103,17 @@ module.exports = {
     getUserData: (jid) => {
         ensureUserData(jid);
         return users[jid];
+    },
+    // Fungsi baru untuk memperbarui dan menyimpan data pengguna (digunakan oleh antiToxic)
+    updateUserData: (jid, dataToUpdate) => {
+        ensureUserData(jid);
+        Object.assign(users[jid], dataToUpdate);
+        saveUsers();
+    },
+    // Fungsi baru untuk mereset pelanggaran toxic (digunakan oleh antiToxic)
+    resetToxicViolations: (jid) => {
+        ensureUserData(jid);
+        users[jid].toxic_violations = 0;
+        saveUsers();
     }
 };

@@ -7,14 +7,17 @@
   ],
   "groups": {
     "120363420084777852@g.us": "general",
-    "120363043812345679@g.us": "game",
-    "120363043812345680@g.us": "language",
-    "120363043812345681@g.us": "blocked"
+    "1203630438123456792@g.us": "game",
+    "1203630438123456280@g.us": "language",
+    "1203630438123456821@g.us": "blocked"
   },
    "broadcastGroups": [
     "120363043812345678@g.us",
     "120363043812345678@g.us"
   ],
-    "adminReportGroup": "120363420084777852@g.us"
+    "adminReportGroup": "120363420084777852@g.us",
+    "toxicAdminJid": "62831506445822@s.whatsapp.net",  
+ "toxicWordsFile": "toxic_words", 
+"scoldingMessagesFile": "scolding_messages"
 
 }

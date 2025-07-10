@@ -1,9 +1,11 @@
+// index.js
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const fs = require('fs-extra');
 const qrcode = require('qrcode-terminal');
 const messageHandler = require('./src/handlers/messageHandler');
 const groupUpdateHandler = require('./src/handlers/groupUpdateHandler');
+const botMessenger = require('./src/utils/botMessenger'); // Import botMessenger
 
 require('dotenv').config();
 
@@ -12,6 +14,8 @@ const logger = pino({ level: 'info' });
 async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
     const sock = makeWASocket({ auth: state, logger });
+
+    botMessenger.init(logger, sock); // Modifikasi ini: sekarang meneruskan 'sock' juga
 
     sock.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect, qr } = update;
@@ -29,7 +33,11 @@ async function connectToWhatsApp() {
             }
         } else if (connection === 'open') {
             console.log('✅ Koneksi berhasil!');
-            // --- Mulai penjadwal setelah koneksi berhasil ---
+            // Pastikan penjadwal dimulai setelah koneksi berhasil
+            const { start: startReportScheduler } = require('./src/utils/reportScheduler');
+            const { start: startActivityScheduler } = require('./src/utils/activityscheduler');
+            startReportScheduler(sock); // Pastikan sock diteruskan jika dibutuhkan oleh reportScheduler
+            startActivityScheduler();
         }
     });
 

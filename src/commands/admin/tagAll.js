@@ -1,3 +1,5 @@
+const { sendBotMessage } = require('../../utils/botMessenger'); // Tambahkan ini
+
 module.exports = {
     name: 'tagall',
     category: 'admin',
@@ -6,7 +8,7 @@ module.exports = {
         try {
             const jid = msg.key.remoteJid;
             if (!jid.endsWith('@g.us')) {
-                return sock.sendMessage(jid, { text: 'Perintah ini hanya bisa digunakan di dalam grup.' }, { quoted: msg });
+                return sendBotMessage(jid, { text: 'Perintah ini hanya bisa digunakan di dalam grup.' }, { quoted: msg });
             }
 
             // 1. Ambil metadata grup untuk mendapatkan daftar anggota
@@ -33,7 +35,7 @@ module.exports = {
             }
             
             // 4. Kirim pesan dengan teks yang sudah dibuat dan JID yang akan di-mention
-            await sock.sendMessage(jid, {
+            await sendBotMessage(jid, {
                 text: text.trim(),
                 mentions: mentions
             }, { quoted: msg });
@@ -41,7 +43,7 @@ module.exports = {
         } catch (error) {
             console.error("Error di perintah !tagall:", error);
             // Pesan error ini lebih akurat. Bot hanya perlu menjadi anggota, bukan admin.
-            await sock.sendMessage(msg.key.remoteJid, { text: `Gagal melakukan tagall. Pastikan bot adalah anggota dari grup ini.` }, { quoted: msg });
+            await sendBotMessage(msg.key.remoteJid, { text: `Gagal melakukan tagall. Pastikan bot adalah anggota dari grup ini.` }, { quoted: msg });
         }
     },
 };

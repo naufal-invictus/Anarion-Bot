@@ -1,3 +1,5 @@
+const { sendBotMessage } = require('../../utils/botMessenger'); // Tambahkan ini
+
 module.exports = {
     name: 'sticker',
     category: 'media',
@@ -7,9 +9,9 @@ module.exports = {
 
         if (quoted?.imageMessage) {
              // Logic to download image and convert to sticker using Baileys' functions
-             await sock.sendMessage(msg.key.remoteJid, { text: '🚧 Sticker command is under construction.' }, { quoted: msg });
+             await sendBotMessage(msg.key.remoteJid, { text: '\ud83d\udea7 Sticker command is under construction.' }, { quoted: msg });
         } else {
-             await sock.sendMessage(msg.key.remoteJid, { text: 'Please reply to an image to create a sticker.' }, { quoted: msg });
+             await sendBotMessage(msg.key.remoteJid, { text: 'Please reply to an image to create a sticker.' }, { quoted: msg });
         }
     },
 };

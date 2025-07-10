@@ -1,4 +1,5 @@
 const botState = require('../../utils/botState');
+const { sendBotMessage } = require('../../utils/botMessenger'); // Tambahkan ini
 
 module.exports = {
     name: 'on',
@@ -7,10 +8,10 @@ module.exports = {
     execute: async (sock, msg) => {
         try {
             botState.setActive(true);
-            await sock.sendMessage(msg.key.remoteJid, { text: '✅ Bot telah diaktifkan.' }, { quoted: msg });
+            await sendBotMessage(msg.key.remoteJid, { text: '\u2705 Bot telah diaktifkan.' }, { quoted: msg });
         } catch (error) {
-            console.error(`❌ Error pada perintah !${this.name}:`, error);
-            await sock.sendMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !${this.name}.` }, { quoted: msg });
+            console.error(`\u274c Error pada perintah !${this.name}:`, error);
+            await sendBotMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !${this.name}.` }, { quoted: msg });
         }
     },
 };

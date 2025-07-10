@@ -1,5 +1,6 @@
 const db = require('./db');
 const { getAndClearLog } = require('./activityLogger');
+const { sendBotMessage } = require('./botMessenger'); // Tambahkan ini
 
 const threeDaysInMillis = 3 * 24 * 60 * 60 * 1000;
 
@@ -38,7 +39,7 @@ const generateAndSendReport = async (sock) => {
             });
         }
 
-        await sock.sendMessage(adminGroupJid, { text: reportText.trim() });
+        await sendBotMessage(adminGroupJid, { text: reportText.trim() });
         return `Laporan aktivitas berhasil dikirim ke grup ${adminGroupJid}`;
 
     } catch (error) {

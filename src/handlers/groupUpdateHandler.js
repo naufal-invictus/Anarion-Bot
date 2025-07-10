@@ -1,5 +1,6 @@
 const db = require('../utils/db');
 const { logActivity } = require('../utils/activityLogger');
+const { sendBotMessage } = require('../utils/botMessenger'); // Tambahkan ini
 
 module.exports = async (sock, { id, participants, action }) => {
     try {
@@ -17,10 +18,10 @@ module.exports = async (sock, { id, participants, action }) => {
                 for (const jid of participants) {
                     if (action === 'add' && groupInfo.welcomeMessage) {
                         const welcomeText = groupInfo.welcomeMessage.replace('@user', `@${jid.split('@')[0]}`);
-                        await sock.sendMessage(id, { text: welcomeText, mentions: [jid] });
+                        await sendBotMessage(id, { text: welcomeText, mentions: [jid] });
                     } else if (action === 'remove' && groupInfo.goodbyeMessage) {
                         const goodbyeText = groupInfo.goodbyeMessage.replace('@user', `@${jid.split('@')[0]}`);
-                        await sock.sendMessage(id, { text: goodbyeText, mentions: [jid] });
+                        await sendBotMessage(id, { text: goodbyeText, mentions: [jid] });
                     }
                 }
             }

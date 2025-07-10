@@ -1,4 +1,5 @@
 const { getAllUsers } = require('../../utils/leveling.js');
+const { sendBotMessage } = require('../../utils/botMessenger'); // Tambahkan ini
 
 // Fungsi helper untuk memformat daftar top 10
 const formatTop10 = (usersArray, period, memberMap) => {
@@ -26,15 +27,15 @@ module.exports = {
         try {
             const periodInput = args[0]?.toLowerCase();
             if (!['day', 'week', 'month', 'all'].includes(periodInput)) {
-                return sock.sendMessage(msg.key.remoteJid, { text: 'Format salah. Gunakan `!report <day|week|month|all>`' }, { quoted: msg });
+                return sendBotMessage(msg.key.remoteJid, { text: 'Format salah. Gunakan `!report <day|week|month|all>`' }, { quoted: msg });
             }
 
             const jid = msg.key.remoteJid;
             if (!jid.endsWith('@g.us')) {
-                return sock.sendMessage(jid, { text: 'Perintah ini hanya bisa digunakan di dalam grup.' }, { quoted: msg });
+                return sendBotMessage(jid, { text: 'Perintah ini hanya bisa digunakan di dalam grup.' }, { quoted: msg });
             }
 
-            await sock.sendMessage(jid, { text: `Mengumpulkan data untuk laporan *${periodInput.toUpperCase()}*...` }, { quoted: msg });
+            await sendBotMessage(jid, { text: `Mengumpulkan data untuk laporan *${periodInput.toUpperCase()}*...` }, { quoted: msg });
 
             const groupMetadata = await sock.groupMetadata(jid);
             const allUsersData = getAllUsers();
@@ -66,11 +67,11 @@ module.exports = {
             usersArray.sort((a, b) => b.count - a.count);
 
             const reportText = formatTop10(usersArray, periodInput, memberMap);
-            await sock.sendMessage(jid, { text: reportText });
+            await sendBotMessage(jid, { text: reportText });
 
         } catch (error) {
             console.error('Error pada perintah !report:', error);
-            await sock.sendMessage(msg.key.remoteJid, { text: 'Gagal membuat laporan aktivitas.' }, { quoted: msg });
+            await sendBotMessage(msg.key.remoteJid, { text: 'Gagal membuat laporan aktivitas.' }, { quoted: msg });
         }
     },
 };

@@ -1,4 +1,5 @@
 const { getUserData } = require('../../utils/leveling.js');
+const { sendBotMessage } = require('../../utils/botMessenger'); // Tambahkan ini
 
 module.exports = {
     name: 'profile',
@@ -22,13 +23,13 @@ module.exports = {
 │
 *╰───────────···*
             `;
-            await sock.sendMessage(msg.key.remoteJid, {
+            await sendBotMessage(msg.key.remoteJid, {
                 text: profileText,
                 mentions: [senderJid]
             }, { quoted: msg });
         } catch (error) {
             console.error("Error di perintah !profile:", error);
-            await sock.sendMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !profile.` }, { quoted: msg });
+            await sendBotMessage(msg.key.remoteJid, { text: `Terjadi kesalahan internal pada perintah !profile.` }, { quoted: msg });
         }
     },
 };
