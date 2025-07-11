@@ -1,11 +1,11 @@
-// src/commands/game/matematika.js
+// src/commands/game/logika.js
 const { startGame } = require('../../utils/gameManager');
 const { sendBotMessage } = require('../../utils/botMessenger');
 
 module.exports = {
-    name: 'math',
+    name: 'logika',
     category: 'game',
-    description: 'Memulai game kuis matematika.',
+    description: 'Memulai game kuis logika.',
     access: {
         general: true,
         game: true,
@@ -20,10 +20,10 @@ module.exports = {
         }
 
         try {
-            await startGame(sock, groupJid, playerJid, 'matematika');
+            await startGame(sock, groupJid, playerJid, 'logika');
         } catch (error) {
-            console.error("Error starting matematika game:", error);
-            await sendBotMessage(groupJid, { text: 'Gagal memulai game matematika. Terjadi kesalahan internal.' }, { quoted: msg });
+            console.error("Error starting logika game:", error);
+            await sendBotMessage(groupJid, { text: 'Gagal memulai game logika. Terjadi kesalahan internal.' }, { quoted: msg });
         }
     },
 };

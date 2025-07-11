@@ -1,7 +1,7 @@
-// index.js (Diperbarui untuk mengubah level logger)
+// index.js
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
-const P = require('pino'); // Import pino
+const P = require('pino');
 const path = require('path');
 const fs = require('fs-extra');
 const chalk = require('chalk');
@@ -11,11 +11,10 @@ const groupParticipantsHandler = require('./src/handlers/groupParticipantsHandle
 const db = require('./src/utils/db');
 const botState = require('./src/utils/botState');
 const botMessenger = require('./src/utils/botMessenger'); 
+const gameManager = require('./src/utils/gameManager'); // Import gameManager
 require('dotenv').config();
 
-// <<< PERUBAHAN DI SINI: UBAH LEVEL LOGGER DARI 'debug' MENJADI 'info' >>>
-const logger = P({ level: 'info' }); 
-// <<< AKHIR PERUBAHAN >>>
+const logger = P({ level: 'info' });
 
 async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState('baileys_auth_info');
@@ -67,6 +66,7 @@ async function connectToWhatsApp() {
             console.log(chalk.blue('Bot is now active.'));
             
             botMessenger.init(logger, sock); 
+            await gameManager.loadGameData(); // Panggil loadGameData setelah botMessenger diinisialisasi
         }
     });
 

@@ -29,7 +29,7 @@ const saveUsers = () => {
     }
 };
 
-// Memastikan struktur data pengguna lengkap dengan data aktivitas dan pelanggaran toxic
+// Memastikan struktur data pengguna lengkap dengan data aktivitas, pelanggaran toxic, dan gameStats
 const ensureUserData = (jid) => {
     if (!users[jid]) {
         users[jid] = {
@@ -44,7 +44,12 @@ const ensureUserData = (jid) => {
                 monthly: 0,
                 total: 0
             },
-            toxic_violations: 0 // <-- TAMBAH INI: Inisialisasi penghitung pelanggaran
+            toxic_violations: 0,
+            gameStats: { // <<< INITIALISASI UNTUK PENGGUNA BARU
+                played: 0,
+                won: 0,
+                lost: 0
+            }
         };
     } else {
         // Kompatibilitas untuk data lama: Pastikan field baru ada
@@ -52,7 +57,11 @@ const ensureUserData = (jid) => {
             users[jid].activity = { daily: 0, weekly: 0, monthly: 0, total: 0 };
         }
         if (users[jid].toxic_violations === undefined) {
-            users[jid].toxic_violations = 0; // <-- TAMBAH INI: Pastikan ada untuk pengguna lama
+            users[jid].toxic_violations = 0;
+        }
+        // <<< PENTING: PASTIKAN GAMESTATS SELALU ADA UNTUK PENGGUNA LAMA ATAU YANG BELUM LENGKAP >>>
+        if (users[jid].gameStats === undefined || users[jid].gameStats === null) {
+            users[jid].gameStats = { played: 0, won: 0, lost: 0 };
         }
     }
 };
@@ -104,13 +113,37 @@ module.exports = {
         ensureUserData(jid);
         return users[jid];
     },
-    // Fungsi baru untuk memperbarui dan menyimpan data pengguna (digunakan oleh antiToxic)
+    // Fungsi untuk memperbarui dan menyimpan data pengguna (lebih robust)
     updateUserData: (jid, dataToUpdate) => {
-        ensureUserData(jid);
-        Object.assign(users[jid], dataToUpdate);
+        ensureUserData(jid); // Pastikan struktur dasar pengguna, termasuk gameStats, sudah ada
+
+        // Buat salinan data pengguna saat ini untuk penggabungan yang aman
+        const currentUserData = users[jid];
+        const updatedData = { ...currentUserData }; // Mulai dengan data saat ini
+
+        // Iterasi melalui dataToUpdate untuk menggabungkan properti
+        for (const key in dataToUpdate) {
+            // Penanganan khusus untuk gameStats: gabungkan secara mendalam jika berupa objek
+            if (key === 'gameStats' && typeof dataToUpdate.gameStats === 'object' && dataToUpdate.gameStats !== null) {
+                updatedData.gameStats = { ...currentUserData.gameStats, ...dataToUpdate.gameStats };
+            } else { 
+                // Tetapkan properti lain (termasuk xp, level, dll.).
+                // Ini akan menimpa properti yang ada di currentUserData
+                // dan menambahkan yang baru dari dataToUpdate.
+                updatedData[key] = dataToUpdate[key];
+            }
+        }
+        
+        // Final check: Pastikan gameStats tetap berupa objek valid setelah semua operasi
+        if (typeof updatedData.gameStats !== 'object' || updatedData.gameStats === null) {
+            updatedData.gameStats = { played: 0, won: 0, lost: 0 };
+        }
+
+
+        users[jid] = updatedData; // Ganti objek pengguna dengan versi yang diperbarui
         saveUsers();
     },
-    // Fungsi baru untuk mereset pelanggaran toxic (digunakan oleh antiToxic)
+    // Fungsi untuk mereset pelanggaran toxic (digunakan oleh antiToxic)
     resetToxicViolations: (jid) => {
         ensureUserData(jid);
         users[jid].toxic_violations = 0;

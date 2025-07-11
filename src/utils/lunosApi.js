@@ -13,10 +13,12 @@ const openai = new OpenAI({
 /**
  * Mengirim permintaan ke Lunos API dengan model yang ditentukan.
  * @param {string} modelName Nama model Lunos yang akan digunakan (e.g., "meta-llama/llama-4-scout").
- * @param {string} query Pertanyaan atau prompt untuk AI.
+ * @param {Array<Object>} messages Array pesan dalam format {role: string, content: string}.
+ * @param {number} [temperature] Nilai temperatur untuk respons AI (default: 1.5).
+ * @param {number} [topP] Nilai top_p untuk respons AI (default: undefined/API default).
  * @returns {Promise<string>} Respons teks dari AI.
  */
-async function askLunos(modelName, query) {
+async function askLunos(modelName, messages, temperature = 1.5, topP = undefined) {
     if (!LUNOS_API_KEY) {
         throw new Error('LUNOS_API_KEY tidak ditemukan di file .env');
     }
@@ -24,11 +26,9 @@ async function askLunos(modelName, query) {
     try {
         const completion = await openai.chat.completions.create({
             model: modelName,
-            messages: [
-                { role: "system", content: "You are a helpful assistant." },
-                { role: "user", content: query }
-            ],
-            temperature: 1.5, // Anda bisa menyesuaikan ini
+            messages: messages,
+            temperature: temperature,
+            top_p: topP // Tambahkan top_p di sini
         });
         return completion.choices[0].message.content;
     } catch (error) {

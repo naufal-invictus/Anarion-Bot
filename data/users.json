@@ -1,17 +1,22 @@
 {
   "6283150645824@s.whatsapp.net": {
-    "xp": 495,
-    "level": 2,
+    "xp": 376,
+    "level": 1,
     "roles": [],
-    "personality": "Belum diatur",
-    "nickname": "Pengguna Baru",
+    "personality": "ENTJ 1W2",
+    "nickname": "naufal",
     "activity": {
-      "daily": 84,
-      "weekly": 152,
-      "monthly": 152,
-      "total": 152
+      "daily": 112,
+      "weekly": 180,
+      "monthly": 180,
+      "total": 180
     },
-    "toxic_violations": 0
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 2,
+      "won": 0,
+      "lost": 2
+    }
   },
   "6287737355609@s.whatsapp.net": {
     "xp": 28,
@@ -27,18 +32,23 @@
     }
   },
   "6285150595238@s.whatsapp.net": {
-    "xp": 67,
+    "xp": 8,
     "level": 0,
     "roles": [],
     "personality": "Belum diatur",
     "nickname": "Pengguna Baru",
     "activity": {
-      "daily": 22,
-      "weekly": 22,
-      "monthly": 22,
-      "total": 22
+      "daily": 77,
+      "weekly": 77,
+      "monthly": 77,
+      "total": 77
     },
-    "toxic_violations": 0
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 14,
+      "won": 2,
+      "lost": 12
+    }
   },
   "120363420084777852@g.us": {
     "xp": 33,
@@ -53,5 +63,176 @@
       "total": 9
     },
     "toxic_violations": 0
+  },
+  "6285951145349@s.whatsapp.net": {
+    "xp": 2,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 1,
+      "weekly": 1,
+      "monthly": 1,
+      "total": 1
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "6282249001641@s.whatsapp.net": {
+    "xp": 6,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 2,
+      "weekly": 2,
+      "monthly": 2,
+      "total": 2
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "6281319191660@s.whatsapp.net": {
+    "xp": 349,
+    "level": 1,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 112,
+      "weekly": 112,
+      "monthly": 112,
+      "total": 112
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "62895405340064@s.whatsapp.net": {
+    "xp": 517,
+    "level": 2,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 164,
+      "weekly": 164,
+      "monthly": 164,
+      "total": 164
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "6288215072776@s.whatsapp.net": {
+    "xp": 66,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 22,
+      "weekly": 22,
+      "monthly": 22,
+      "total": 22
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "6285878087525@s.whatsapp.net": {
+    "xp": 209,
+    "level": 1,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 76,
+      "weekly": 76,
+      "monthly": 76,
+      "total": 76
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "6285782755205@s.whatsapp.net": {
+    "xp": 45,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 13,
+      "weekly": 13,
+      "monthly": 13,
+      "total": 13
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "6282329131856@s.whatsapp.net": {
+    "xp": 96,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 32,
+      "weekly": 32,
+      "monthly": 32,
+      "total": 32
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
+  },
+  "6281224380131@s.whatsapp.net": {
+    "xp": 6,
+    "level": 0,
+    "roles": [],
+    "personality": "Belum diatur",
+    "nickname": "Pengguna Baru",
+    "activity": {
+      "daily": 2,
+      "weekly": 2,
+      "monthly": 2,
+      "total": 2
+    },
+    "toxic_violations": 0,
+    "gameStats": {
+      "played": 0,
+      "won": 0,
+      "lost": 0
+    }
   }
 }

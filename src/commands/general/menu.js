@@ -29,7 +29,28 @@ module.exports = {
 │
 │  • *!profile* - Lihat profil Anda
 │  • *!menu* - Tampilkan menu ini
+│  • *!fakta* - Dapatkan fakta
+│  • *!roast <tipe_kepribadian>* - Roast kepribadian dengan kejam
+│  • *!setnick <nickname>* - Atur nickname Anda
+│  • *!settypo <tipe_typology>* - Atur tipe typology Anda
+│  • *!setrole <nama_peran>* - Atur peran Anda
+│  • *!listroles* - Lihat daftar peran tersedia
+│  • *!mp3 <url_sosmed>* - Unduh audio MP3
+│  • *!mp4 <url_sosmed>* - Unduh video MP4
+│  • *!spotify <url_lagu>* - Unduh lagu Spotify
+│  • *!tiktok <url_tiktok>* - Unduh video/gambar/musik TikTok
 │
+*├───「 🎮 Perintah Game 」───*
+│
+│  • *!riddle* - Mulai tebak riddle
+│  • *!matematika* - Mulai kuis matematika
+│  • *!sejarah* - Mulai kuis sejarah
+│  • *!logika* - Mulai kuis logika
+│  • *!trivia* - Mulai kuis trivia
+│  •    *!jawab <jawaban>* - Jawab pertanyaan game
+│  •    *!nyerah* - Menyerah dari game
+│  
+
 *├───「 🧠 Perintah AI 」───*
 │
 │  • *!gemini <teks>* - Tanya AI Gemini

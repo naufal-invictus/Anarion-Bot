@@ -1,4 +1,4 @@
-// src/handlers/messageHandler.js (Diperbarui untuk logging pesan grup)
+// src/handlers/messageHandler.js (Diperbarui untuk logging pesan grup dan parameter RP)
 const path = require('path');
 const fs = require('fs-extra');
 const db = require('../utils/db');
@@ -54,29 +54,23 @@ module.exports = async (sock, msg, logger) => {
     const text = message?.conversation || message?.extendedTextMessage?.text || '';
     const senderJid = key.participant || key.remoteJid;
     const groupJid = key.remoteJid;
-    const config = await db.readData('config'); // Pastikan config dibaca di sini
-    const groupsData = await db.readData('groups'); // Pastikan groupsData dibaca di sini
+    const config = await db.readData('config');
+    const groupsData = await db.readData('groups');
     const senderName = msg.pushName || senderJid.split('@')[0]; 
 
-    // <<< TAMBAH LOG UNTUK SEMUA PESAN GRUP DI SINI >>>
+    // Log pesan grup
     if (groupJid.endsWith('@g.us')) {
-        const groupCategory = config.groups[groupJid] || 'undefined/not-listed'; // Mengambil kategori grup, fallback jika tidak ada
-        // Hapus console.log debug yang lama
-        // console.log(`[DEBUG] Pesan dari Grup ID: ${groupJid}`); 
-        // console.log(`[DEBUG] Kategori Grup terdeteksi: ${groupCategory}`);
-
-        // Log pesan grup dalam format yang diminta
+        const groupCategory = config.groups[groupJid] || 'undefined/not-listed';
         logger.info(`[PESAN_GRUP] Pesan dari ${senderName} (${senderJid.split('@')[0]}): '${text}', dari grup ID: ${groupJid}, Kategori: ${groupCategory}`);
     }
-    // <<< AKHIR TAMBAHAN >>>
 
     // Cek status On/Off bot (global)
     if (!botState.isActive() && !text.startsWith('!on')) {
         return;
     }
 
-    // Filter Grup: Hanya merespons di grup yang tidak diblokir atau tidak ada di config.groups
-    const groupCategory = config.groups[groupJid]; // Mengambil ulang kategori grup (untuk logika filter ini)
+    // Filter Grup: Hanya merespons di grup yang tidak diblokir
+    const groupCategory = config.groups[groupJid];
     if (groupJid.endsWith('@g.us') && (!groupCategory || groupCategory === 'blocked')) {
         if (!text.startsWith('!on')) {
             return;
@@ -149,29 +143,39 @@ module.exports = async (sock, msg, logger) => {
             await db.writeData('groups', groupsData);
         }
 
+        // Pastikan groupChatHistory terinisialisasi
         if (!groupConfig.groupChatHistory) {
             groupConfig.groupChatHistory = [];
         }
 
         let groupChatHistory = groupConfig.groupChatHistory;
 
+        // Cek jika pesan berisi kata kunci "pelayan" dan mode roleplay aktif
         if (groupConfig.rpModeEnabled && text.toLowerCase().includes('pelayan')) {
             console.log(`[RP-BOT] Menerima pesan roleplay dari ${senderJid} di ${groupJid}`);
 
+            // Tambahkan pesan pengguna ke riwayat chat
             groupChatHistory.push({ role: 'user', senderName: senderName, content: text });
 
-            const MAX_HISTORY_LENGTH = 15;
+            // Batasi panjang riwayat chat
+            const MAX_HISTORY_LENGTH = 15; // Jumlah pesan terakhir yang akan disimpan
             if (groupChatHistory.length > MAX_HISTORY_LENGTH) {
                 groupChatHistory = groupChatHistory.slice(-MAX_HISTORY_LENGTH);
             }
 
             try {
-                const rpResponse = await askSmartAI(text, groupChatHistory, true);
+                // Panggil askSmartAI dengan parameter temperature dan top_p spesifik untuk roleplay
+                const RP_TEMPERATURE = 1.0;
+                const RP_TOP_P = 0.95;
+
+                const rpResponse = await askSmartAI(text, groupChatHistory, true, RP_TEMPERATURE, RP_TOP_P);
 
                 if (rpResponse && typeof rpResponse.text === 'string' && rpResponse.text.length > 0) {
                     await botMessenger.sendBotMessage(groupJid, { text: rpResponse.text }, { quoted: msg });
+                    // Tambahkan respons bot ke riwayat chat
                     groupChatHistory.push({ role: 'assistant', content: rpResponse.text });
                     
+                    // Simpan kembali riwayat chat yang diperbarui
                     groupConfig.groupChatHistory = groupChatHistory;
                     await db.writeData('groups', groupsData); 
                 } else {
@@ -180,6 +184,8 @@ module.exports = async (sock, msg, logger) => {
 
             } catch (error) {
                 console.error(`[RP-BOT] Error saat memanggil AI untuk roleplay:`, error);
+                // Mungkin kirim pesan error umum ke grup jika terjadi kesalahan fatal
+                await botMessenger.sendBotMessage(groupJid, { text: 'Maaf, Pelayan sedang sakit kepala dan tidak bisa merespons saat ini. (´-ω-`)ゞ' }, { quoted: msg });
             }
         }
     }

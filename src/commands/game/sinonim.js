@@ -1,11 +1,11 @@
-// src/commands/game/matematika.js
+// src/commands/game/sinonim.js
 const { startGame } = require('../../utils/gameManager');
 const { sendBotMessage } = require('../../utils/botMessenger');
 
 module.exports = {
-    name: 'math',
+    name: 'sinonim',
     category: 'game',
-    description: 'Memulai game kuis matematika.',
+    description: 'Memulai game tebak sinonim.',
     access: {
         general: true,
         game: true,
@@ -20,10 +20,10 @@ module.exports = {
         }
 
         try {
-            await startGame(sock, groupJid, playerJid, 'matematika');
+            await startGame(sock, groupJid, playerJid, 'sinonim');
         } catch (error) {
-            console.error("Error starting matematika game:", error);
-            await sendBotMessage(groupJid, { text: 'Gagal memulai game matematika. Terjadi kesalahan internal.' }, { quoted: msg });
+            console.error("Error starting sinonim game:", error);
+            await sendBotMessage(groupJid, { text: 'Gagal memulai game sinonim. Terjadi kesalahan internal.' }, { quoted: msg });
         }
     },
 };
