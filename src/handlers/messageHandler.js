@@ -1,4 +1,4 @@
-// src/handlers/messageHandler.js (Diperbarui untuk logging pesan grup dan parameter RP)
+// src/handlers/messageHandler.js (Perbaikan untuk ReferenceError)
 const path = require('path');
 const fs = require('fs-extra');
 const db = require('../utils/db');
@@ -150,9 +150,9 @@ module.exports = async (sock, msg, logger) => {
 
         let groupChatHistory = groupConfig.groupChatHistory;
 
-        // Cek jika pesan berisi kata kunci "pelayan" dan mode roleplay aktif
-        if (groupConfig.rpModeEnabled && text.toLowerCase().includes('pelayan')) {
-            console.log(`[RP-BOT] Menerima pesan roleplay dari ${senderJid} di ${groupJid}`);
+        // Cek jika pesan berisi kata kunci "pelayan" atau "himari" dan mode roleplay aktif
+        if (groupConfig.rpModeEnabled && (text.toLowerCase().includes('pelayan') || text.toLowerCase().includes('himari'))) {
+            console.log(`[RP-BOT] Menerima pesan roleplay Yandere dari ${senderName} di ${groupJid}`);
 
             // Tambahkan pesan pengguna ke riwayat chat
             groupChatHistory.push({ role: 'user', senderName: senderName, content: text });
@@ -164,11 +164,17 @@ module.exports = async (sock, msg, logger) => {
             }
 
             try {
-                // Panggil askSmartAI dengan parameter temperature dan top_p spesifik untuk roleplay
-                const RP_TEMPERATURE = 1.0;
-                const RP_TOP_P = 0.95;
+                // PERBAIKAN: Definisikan dan gunakan objek konfigurasi yang benar
+                const rpGenerationConfig = {
+                    temperature: 1,
+                    topP: 0.95,
+                    maxOutputTokens: 120,
+                    topK: 1,
+                    seed: 42
+                };
 
-                const rpResponse = await askSmartAI(text, groupChatHistory, true, RP_TEMPERATURE, RP_TOP_P);
+                // Panggil askSmartAI dengan parameter yang benar: text, senderName, history, isRp, dan config object
+                const rpResponse = await askSmartAI(text, senderName, groupChatHistory, true, rpGenerationConfig);
 
                 if (rpResponse && typeof rpResponse.text === 'string' && rpResponse.text.length > 0) {
                     await botMessenger.sendBotMessage(groupJid, { text: rpResponse.text }, { quoted: msg });
@@ -179,13 +185,12 @@ module.exports = async (sock, msg, logger) => {
                     groupConfig.groupChatHistory = groupChatHistory;
                     await db.writeData('groups', groupsData); 
                 } else {
-                    console.warn(`[RP-BOT] AI gagal memberikan respons atau respons kosong untuk query: "${text}"`);
+                    console.warn(`[RP-BOT] Yandere AI gagal memberikan respons atau respons kosong untuk query: "${text}"`);
                 }
 
             } catch (error) {
                 console.error(`[RP-BOT] Error saat memanggil AI untuk roleplay:`, error);
-                // Mungkin kirim pesan error umum ke grup jika terjadi kesalahan fatal
-                await botMessenger.sendBotMessage(groupJid, { text: 'Maaf, Pelayan sedang sakit kepala dan tidak bisa merespons saat ini. (´-ω-`)ゞ' }, { quoted: msg });
+                await botMessenger.sendBotMessage(groupJid, { text: 'Ara ara~ Himari lagi pusing... Tuan bisa tanya lagi nanti? Gomen ne~ (｡•́︿•̀｡)' }, { quoted: msg });
             }
         }
     }
