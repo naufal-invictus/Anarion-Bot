@@ -11,7 +11,7 @@ const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
 const geminiModel = genAI ? genAI.getGenerativeModel({ model: "gemini-2.0-flash" }) : null; 
 
 // Persona untuk Roleplay Bot
-const rpSystemPromptContent = 'Kamu adalah Himari, seorang gadis pelayan yandere dengan kepribadian ENFJ dan Kamu membenci orang yang bernama (Anarion). Kamu harus selalu mengingat orang yang berinteraksi denganmu. Gunakan bahasa Indonesia kasual yang dicampur dengan kata-kata wibu banyak kaomoji yang mencerminkan sifatmu (contoh: (´｡• ᵕ •｡`), ♡, (*^▽^*), (Φ ω Φ), 🔪, ψ( ` ∇ ´ )ψ). Jaga respons agar tidak repetitif, sangat singkat, dan selalu dalam karakter.';
+const rpSystemPromptContent = 'Kamu adalah Himari, seorang gadis pelayan yandere dengan kepribadian ESFJ. Kamu harus selalu mengingat orang yang berinteraksi denganmu. Gunakan bahasa Indonesia kasual yang dicampur dengan kata-kata wibu kaomoji yang mencerminkan sifatmu (contoh: (´｡• ᵕ •｡`), ♡, (*^▽^*), (Φ ω Φ), 🔪, ψ( ` ∇ ´ )ψ). Jaga respons agar tidak repetitif, sangat singkat (max 350 karakter), dan selalu dalam karakter.';
 
 /**
  * Mengirim permintaan ke Gemini API dan mengembalikan respons teks.
@@ -70,15 +70,15 @@ async function askGemini(userQuery, chatHistory = [], isRpMode = false, generati
     }
 }
 
-async function askGroq(query, temperature = 1.0, topP = 1.0) {
+async function askGroq(query, temperature = 1.0, topP = 0.95) {
     return askLunos('xai/grok-3-mini', [{ role: 'user', content: query }], temperature, topP);
 }
 
-async function askQwen(query, temperature = 1.0, topP = 1.0) {
+async function askQwen(query, temperature = 1.0, topP = 0.95) {
     return askLunos('meta-llama/llama-4-scout', [{ role: 'user', content: query }], temperature, topP);
 }
 
-async function askLlamaMaverick(query, temperature = 1.0, topP = 1.0) {
+async function askLlamaMaverick(query, temperature = 1.0, topP = 0.95) {
     return askLunos('meta-llama/llama-4-maverick', [{ role: 'user', content: query }], temperature, topP);
 }
 

@@ -11,6 +11,9 @@ const botMessenger = require('../utils/botMessenger');
 const antiSpam = new Map();
 const SPAM_COOLDOWN = 5000; 
 
+const processingRp = new Set(); // Melacak grup mana yang sedang diproses RP-nya
+const rpCooldowns = new Map(); // Menyimpan waktu cooldown untuk setiap grup
+
 // --- Konfigurasi Filter Pesan Lama ---
 const MESSAGE_AGE_THRESHOLD = 60 * 1000; 
 
@@ -152,19 +155,41 @@ module.exports = async (sock, msg, logger) => {
 
         // Cek jika pesan berisi kata kunci "pelayan" atau "himari" dan mode roleplay aktif
         if (groupConfig.rpModeEnabled && (text.toLowerCase().includes('pelayan') || text.toLowerCase().includes('himari'))) {
-            console.log(`[RP-BOT] Menerima pesan roleplay Yandere dari ${senderName} di ${groupJid}`);
+            const now = Date.now();
+            const cooldownEnd = rpCooldowns.get(groupJid);
 
-            // Tambahkan pesan pengguna ke riwayat chat
-            groupChatHistory.push({ role: 'user', senderName: senderName, content: text });
+            // 1. Cek apakah grup sedang dalam masa cooldown
+            if (cooldownEnd && now < cooldownEnd) {
+                logger.info(`[RP-BOT] Cooldown RP aktif di grup ${groupJid}. Pesan diabaikan.`);
+                return; // Abaikan pesan secara diam-diam jika cooldown aktif
+            }
 
-            // Batasi panjang riwayat chat
-            const MAX_HISTORY_LENGTH = 15; // Jumlah pesan terakhir yang akan disimpan
-            if (groupChatHistory.length > MAX_HISTORY_LENGTH) {
-                groupChatHistory = groupChatHistory.slice(-MAX_HISTORY_LENGTH);
+            // 2. Cek apakah ada permintaan lain yang sedang diproses di grup ini
+            if (processingRp.has(groupJid)) {
+                logger.warn(`[RP-BOT] Panggilan simultan terdeteksi di grup ${groupJid}. Mengaktifkan cooldown.`);
+                
+                // Kirim pesan "lelah" sesuai permintaan Anda, dengan gaya Himari
+                await botMessenger.sendBotMessage(groupJid, { text: 'Ara ara~ Tuan-tuan semua memanggil Himari bersamaan... Himari jadi capek harus imut terus~ Gomen, Himari mau istirahat sebentar ya... (シ_ _)シ' }, { quoted: msg });
+                
+                // Atur cooldown selama 30 detik untuk grup ini
+                rpCooldowns.set(groupJid, now + 30000); 
+                return; // Hentikan pemrosesan untuk panggilan ini
             }
 
             try {
-                // PERBAIKAN: Definisikan dan gunakan objek konfigurasi yang benar
+                // 3. Tandai bahwa grup ini sedang diproses
+                processingRp.add(groupJid);
+
+                logger.info(`[RP-BOT] Menerima pesan roleplay   dari ${senderName} di ${groupJid}`);
+
+                let groupChatHistory = groupConfig.groupChatHistory || [];
+                groupChatHistory.push({ role: 'user', senderName: senderName, content: text });
+
+                const MAX_HISTORY_LENGTH = 15;
+                if (groupChatHistory.length > MAX_HISTORY_LENGTH) {
+                    groupChatHistory = groupChatHistory.slice(-MAX_HISTORY_LENGTH);
+                }
+
                 const rpGenerationConfig = {
                     temperature: 1,
                     topP: 0.95,
@@ -173,24 +198,24 @@ module.exports = async (sock, msg, logger) => {
                     seed: 42
                 };
 
-                // Panggil askSmartAI dengan parameter yang benar: text, senderName, history, isRp, dan config object
                 const rpResponse = await askSmartAI(text, senderName, groupChatHistory, true, rpGenerationConfig);
 
-                if (rpResponse && typeof rpResponse.text === 'string' && rpResponse.text.length > 0) {
+                if (rpResponse && rpResponse.text) {
                     await botMessenger.sendBotMessage(groupJid, { text: rpResponse.text }, { quoted: msg });
-                    // Tambahkan respons bot ke riwayat chat
                     groupChatHistory.push({ role: 'assistant', content: rpResponse.text });
                     
-                    // Simpan kembali riwayat chat yang diperbarui
                     groupConfig.groupChatHistory = groupChatHistory;
                     await db.writeData('groups', groupsData); 
                 } else {
-                    console.warn(`[RP-BOT] Yandere AI gagal memberikan respons atau respons kosong untuk query: "${text}"`);
+                    logger.warn(`[RP-BOT]   AI gagal memberikan respons untuk query: "${text}"`);
                 }
 
             } catch (error) {
-                console.error(`[RP-BOT] Error saat memanggil AI untuk roleplay:`, error);
+                logger.error(`[RP-BOT] Error saat memanggil AI untuk roleplay:`, error);
                 await botMessenger.sendBotMessage(groupJid, { text: 'Ara ara~ Himari lagi pusing... Tuan bisa tanya lagi nanti? Gomen ne~ (｡•́︿•̀｡)' }, { quoted: msg });
+            } finally {
+                // 4. Pastikan untuk selalu menghapus tanda "sedang diproses" setelah selesai
+                processingRp.delete(groupJid);
             }
         }
     }

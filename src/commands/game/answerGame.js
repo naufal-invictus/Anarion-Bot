@@ -17,7 +17,7 @@ module.exports = {
         const userAnswer = args.join(' ').trim();
 
         if (!userAnswer) {
-            return sendBotMessage(msg.key.remoteJid, { text: 'Mohon sertakan jawaban Anda. Contoh: `!jawab [jawaban Anda]`' }, { quoted: msg });
+            return sendBotMessage(msg.key.remoteJid, { text: 'Mohon sertakan jawaban Anda. Contoh: `!jawab`' }, { quoted: msg });
         }
 
         // Pastikan perintah hanya bisa digunakan di grup

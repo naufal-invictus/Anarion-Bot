@@ -54,7 +54,7 @@ async function startGame(sock, groupJid, playerJid, category) {
         return false;
     }
 
-    const questionText = `*───「 Game ${category.toUpperCase()} Dimulai! 」───*\n\nPertanyaan:\n*${questionData.question}*\n\n_Waktu: 45 detik. Jawab dengan !j [jawaban Anda]_`;
+    const questionText = `*───「 Game ${category.toUpperCase()} Dimulai! 」───*\n\nPertanyaan:\n*${questionData.question}*\n\n_Waktu: 45 detik. Jawab dengan !jawab [jawaban Anda]_`;
 
     await botMessenger.sendBotMessage(groupJid, { text: questionText });
 
