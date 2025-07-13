@@ -51,7 +51,7 @@ async function askQwenTurbo(query, systemPrompt, temperature = 0.7, topP = 0.8) 
  * @param {number} [topP] Nilai top_p untuk respons AI (default: 0.8).
  * @returns {Promise<string>} Respons teks dari AI.
  */
-async function askQwen3(query, systemPrompt, temperature = 0.7, topP = 0.8) {
+async function askQwen3(query, systemPrompt, temperature = 0.7, topP = 0.95) {
     try {
         const openai = getOpenAIClient();
         const messages = [];
@@ -81,7 +81,7 @@ async function askQwen3(query, systemPrompt, temperature = 0.7, topP = 0.8) {
  * @param {number} [topP] Nilai top_p untuk respons AI (default: 0.8).
  * @returns {Promise<string>} Respons teks dari AI.
  */
-async function askQwenMax(query, systemPrompt, temperature = 0.7, topP = 0.8) {
+async function askQwenMax(query, systemPrompt, temperature = 0.7, topP = 0.95) {
     try {
         const openai = getOpenAIClient();
         const messages = [];
